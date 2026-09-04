@@ -1,40 +1,31 @@
-
-
-
 name: Video Downloader
 
 on:
   workflow_dispatch:
     inputs:
-      url:
-        description: "Video URL"
+      video_url:
+        description: 'Video URL to download'
         required: true
         type: string
 
 jobs:
   download:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Install yt-dlp and FFmpeg
+      - name: Install yt-dlp
         run: |
           sudo apt-get update
           sudo apt-get install -y ffmpeg
-          python3 -m pip install --upgrade yt-dlp
+          pip install -U "yt-dlp[default,curl-cffi]"
 
       - name: Download video
         run: |
           mkdir -p downloads
+          yt-dlp --impersonate chrome -o "downloads/%(title)s.%(ext)s" "${{ github.event.inputs.video_url }}"
 
-          yt-dlp \
-            --no-playlist \
-            --merge-output-format mp4 \
-            -o "downloads/%(title)s.%(ext)s" \
-            "${{ inputs.url }}"
-
-      - name: Upload video
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: downloaded-video
           path: downloads/
-          if-no-files-found: error
+          retention-days: 3
