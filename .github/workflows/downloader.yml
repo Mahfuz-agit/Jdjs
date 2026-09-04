@@ -18,6 +18,12 @@ jobs:
           sudo apt-get install -y ffmpeg
           pip install -U "yt-dlp[default,curl-cffi]"
 
+      - name: Install deno
+        run: curl -fsSL https://deno.land/install.sh | sh
+
+      - name: Add cookies
+        run: echo "${{ secrets.YT_COOKIES }}" > cookies.txt
+
       - name: Download video
         run: |
           mkdir -p downloads
